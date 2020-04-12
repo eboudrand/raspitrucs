@@ -1,0 +1,51 @@
+LOGFILE="/var/log/lcd.log"
+DEBUG="yes"
+SETUPDIR="/usr/local/bin"
+
+alt_ip=""
+
+log()
+{
+    if [ "$DEBUG" = "yes" ]; then
+        echo LCD `date +"%F %X"` $1 >> $LOGFILE
+    fi
+}
+
+log "event $reason for interface $interface"
+
+if [ "$if_up" = "true" ]
+then 
+    log "$interface is up : $new_ip_address"
+    if [ "$reason" = "BOUND" ]
+    then
+        $SETUPDIR/lcd_setup interface $new_ip_address
+    fi
+else
+    if [ "$if_down" = "true" ]; then
+        log "$interface is down"
+    else
+        log "$interface is not down and not up"
+    fi
+    
+    other_ip=""
+    
+    itfnames=`ip -o link show | awk -F': ' '{if ($2 != "lo") print $2}'`    
+    for itf in $itfnames
+    do
+        ip=`ip addr show $itf | grep "inet\b" | awk '{print $2}' | cut -d '/' -f 1`
+        if [ "$ip" != "" ]; then
+            log "detected interface $itf with IP $ip"
+            other_ip=$ip
+        else
+            log "detected interface $itf with no IP"
+        fi
+    done
+    
+    other_ip=$ip
+    if [ "$other_ip" != "" ]; then
+        $SETUPDIR/lcd_setup interface $other_ip
+    else
+        $SETUPDIR/lcd_setup interface "deconnection"
+    fi  
+fi
+
