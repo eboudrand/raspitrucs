@@ -6,3 +6,5 @@
 - Copier lcd_setup dans /usr/local/bin
 - changer les droits d'exécution de lcd_setup : sudo chmod +x /usr/local/bin/lcd_setup
 - copier 60-lcd dans /lib/dhcpcd/dhcpcd-hooks/
+
+Le script 60-lcd génère /var/log/lcd.log. Pour désactiver, ne pas mettre DEBUG à "yes".
